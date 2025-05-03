@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>최소 데시벨 계산기</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #f8f9fa; }
+        .container { max-width: 500px; margin-top: 40px; }
+        .result-box { background: #fff; border-radius: 10px; box-shadow: 0 2px 8px #0001; padding: 30px; }
+        .form-label { font-weight: 600; }
+        #result { font-size: 1.2em; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="result-box">
+        <h3 class="mb-4 text-primary">최소 데시벨 계산기기</h3>
+        <form id="calcForm" onsubmit="event.preventDefault(); calcL1();">
+            <div class="mb-3">
+            <label class="form-label">주변 소음 (dB)</label>
+            <input type="number" class="form-control" id="L3" value="55" min="0" required>
+            </div>
+            <div class="mb-3">
+            <label class="form-label">상대와의 거리 (m)</label>
+            <input type="number" class="form-control" id="r2" value="10"  step="0.01" required>
+            </div>
+            <div class="mb-3">
+            <label class="form-label">바람 방향 (나와 상대방 기준)</label>
+            <select class="form-select" id="windDir">
+                <option value="downwind">순풍</option>
+                <option value="crosswind">측풍</option>
+                <option value="upwind">역풍</option>
+            </select>
+            </div>
+            <div class="mb-3">
+            <label class="form-label">바람 세기</label>
+            <select class="form-select" id="windStr">
+                <option value="weak">약함 (1~3 m/s)</option>
+                <option value="normal">보통 (4~7 m/s)</option>
+                <option value="strong">강함 (8m/s 이상)</option>
+            </select>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">계산하기</button>
+        </form>
+        <div id="result" class="text-center mt-4"></div>
+        <hr>
+        </div>
+    </div>
+    <script>
+        function getBeta(dir, str) {
+        const betaTable = {
+            downwind: { weak: 0, normal: 0, strong: -0.01 },
+            crosswind: { weak: 0.005, normal: 0.01, strong: 0.01 },
+            upwind: { weak: 0.01, normal: 0.02, strong: 0.03 }
+        };
+        return betaTable[dir][str];
+        }
+
+        function calcL1() {
+        const L3 = parseFloat(document.getElementById('L3').value);
+        const r2 = parseFloat(document.getElementById('r2').value);
+        const windDir = document.getElementById('windDir').value;
+        const windStr = document.getElementById('windStr').value;
+
+        const beta = getBeta(windDir, windStr);
+
+        const L1 = L3 + 10 + 20 * Math.log10(r2 / 0.1) + beta * (r2 - 0.1);
+
+        document.getElementById('result').innerHTML =
+            `<b>최소 데시벨(L₁):</b> <span class="text-danger">${L1.toFixed(1)} dB</span>`;
+        }
+    </script>
+</body>
+</html>
